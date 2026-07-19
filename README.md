@@ -1,6 +1,8 @@
 # Drishti — Frontend
 
-React PWA for the Drishti risk engine. See [../README.md](../README.md) for full project docs.
+React PWA for the Drishti risk engine.
+
+**What we built:** A deterministic causal risk engine with 7 weighted components (Cash Runway, DSCR, Income Stability, Seasonal Position, Input Cost Pressure, Recovery Quality, External Risk), 50+ configurable rulebook rules across 4 categories, 5 sector profiles (Dairy, Rural Retail, Poultry, MGNREGA, Agriculture), 9 demo enterprises with causally-linked synthetic data, DPI signal simulation (UPI velocity, NACH bounce, MGNREGA demand, mandi prices) with convergence detection, savings floor analysis, 5-layer household debt tracking, peer-relative context, actionable suggestions, and a 6-month cash flow forecast — all running entirely in-browser with zero backend. Built for NABARD's 479 DDMs who need to see 63 million enterprises they can't visit.
 
 ## Quick Start
 
