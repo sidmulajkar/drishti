@@ -1,6 +1,5 @@
 {
-  "framework": "vite",
-  "buildCommand": "npm run build",
+  "buildCommand": "vite build && node scripts/postbuild.mjs",
   "outputDirectory": "dist",
   "routes": [
     {
