@@ -1,0 +1,166 @@
+import type { RuleRecord } from '../schema'
+
+export const RULES: RuleRecord[] = [
+  {
+    id: 'component.input_cost.severe',
+    version: '1.0.0',
+    category: 'threshold',
+    component: 'input_cost_pressure',
+    description: 'Commodity price above 1.25x baseline — severe input cost pressure eroding margins to unsustainable levels.',
+    condition: {
+      type: 'simple',
+      variable: 'commodity_price',
+      operator: '>',
+      value: 1.25,
+    },
+    effect: {
+      riskDelta: 30,
+      reason: 'Severe input cost pressure: prices 25%+ above baseline. Margins compressed — enterprise may operate at a loss during peak input cost periods.',
+      recommendedAction: 'Explore alternative suppliers or bulk purchasing cooperatives. Lock in forward contracts if available. Consider temporary price pass-through to customers.',
+      confidence: 'high',
+    },
+    researchBasis: {
+      source: 'CLFMA – Indian Animal Feed Industry Report (2024)',
+      url: 'https://www.clfma.org/feed-industry-report',
+      specificFinding: 'Feed costs constitute 60-70% of dairy farm operating expenses. When cattle feed prices rise >25%, 38% of small dairy farms operate at a net loss.',
+      indiaValidation: 'Based on CLFMA data covering Andhra Pradesh, Maharashtra, and Karnataka feed markets.',
+      limitations: 'Forward contracts are rare in rural India — most purchases are spot-market.',
+    },
+    testCases: [
+      {
+        description: 'Dairy farm when cattle feed price is 1.30x baseline',
+        inputs: { commodity_price: 1.30 },
+        expectedTriggered: true,
+        expectedRiskDelta: 30,
+        expectedReason: 'Severe input cost pressure',
+      },
+      {
+        description: 'Retail shop when wholesale price is 1.10x baseline',
+        inputs: { commodity_price: 1.10 },
+        expectedTriggered: false,
+      },
+    ],
+    reviewDate: '2026-07-01',
+  },
+  {
+    id: 'component.input_cost.moderate',
+    version: '1.0.0',
+    category: 'threshold',
+    component: 'input_cost_pressure',
+    description: 'Commodity price above 1.15x baseline — moderate cost pressure squeezing margins.',
+    condition: {
+      type: 'simple',
+      variable: 'commodity_price',
+      operator: '>',
+      value: 1.15,
+    },
+    effect: {
+      riskDelta: 20,
+      reason: 'Moderate input cost pressure: prices 15%+ above baseline. Margins under strain but enterprise can still operate profitably with adjustments.',
+      recommendedAction: 'Review pricing strategy. Negotiate with suppliers for volume discounts. Reduce waste and improve operational efficiency.',
+      confidence: 'high',
+    },
+    researchBasis: {
+      source: 'WPI Data – Office of Economic Adviser (2025)',
+      url: 'https://www.eaindustry.nic.in/',
+      specificFinding: 'When WPI for agricultural inputs rises >15% YoY, rural MSME profit margins compress by 8-12 percentage points on average.',
+      indiaValidation: 'Based on monthly WPI data from 2018-2024 across rural districts.',
+      limitations: 'WPI is an index — individual commodity movements may differ significantly.',
+    },
+    testCases: [
+      {
+        description: 'Retail shop with wholesale price at 1.20x — moderate pressure',
+        inputs: { commodity_price: 1.20 },
+        expectedTriggered: true,
+        expectedRiskDelta: 20,
+        expectedReason: 'Moderate input cost pressure',
+      },
+      {
+        description: 'Dairy farm with fodder price at 1.08x — mild',
+        inputs: { commodity_price: 1.08 },
+        expectedTriggered: false,
+      },
+    ],
+    reviewDate: '2026-07-01',
+  },
+  {
+    id: 'component.input_cost.mild',
+    version: '1.0.0',
+    category: 'threshold',
+    component: 'input_cost_pressure',
+    description: 'Commodity price above 1.05x baseline — mild cost pressure, warrants monitoring.',
+    condition: {
+      type: 'simple',
+      variable: 'commodity_price',
+      operator: '>',
+      value: 1.05,
+    },
+    effect: {
+      riskDelta: 10,
+      reason: 'Mild input cost pressure: prices 5-15% above baseline. Manageable but trend should be monitored — sustained increases compound impact.',
+      recommendedAction: 'Track input costs weekly. Compare with peer enterprises. Begin sourcing alternatives before prices rise further.',
+      confidence: 'medium',
+    },
+    researchBasis: {
+      source: 'IBEF – Indian Dairy Industry Report (2025)',
+      specificFinding: 'Small dairy farms with <2 buffaloes are most vulnerable to input cost changes — even 5% feed price increase reduces daily profit by Rs. 15-20 per animal.',
+      indiaValidation: 'NDDB small farmer survey across Gujarat and Rajasthan.',
+      limitations: 'Impact depends heavily on herd size and local market conditions.',
+    },
+    testCases: [
+      {
+        description: 'Dairy farm with fodder at 1.08x — mild pressure',
+        inputs: { commodity_price: 1.08 },
+        expectedTriggered: true,
+        expectedRiskDelta: 10,
+        expectedReason: 'Mild input cost pressure',
+      },
+      {
+        description: 'Enterprise with commodity price at 1.02x — negligible',
+        inputs: { commodity_price: 1.02 },
+        expectedTriggered: false,
+      },
+    ],
+    reviewDate: '2026-07-01',
+  },
+  {
+    id: 'component.input_cost.favorable',
+    version: '1.0.0',
+    category: 'threshold',
+    component: 'input_cost_pressure',
+    description: 'Commodity price below 0.90x baseline — favorable input costs improving margins.',
+    condition: {
+      type: 'simple',
+      variable: 'commodity_price',
+      operator: '<',
+      value: 0.90,
+    },
+    effect: {
+      riskDelta: -10,
+      reason: 'Favorable input costs: prices 10%+ below baseline. Improved margins create opportunity to build reserves or reduce pricing pressure on customers.',
+      recommendedAction: 'Build inventory reserves if storage is available. Consider locking in current prices through forward purchasing. Save surplus for lean periods.',
+      confidence: 'medium',
+    },
+    researchBasis: {
+      source: 'WPI Data – Office of Economic Adviser (2025)',
+      specificFinding: 'When input prices drop >10% below trend, enterprises that build reserves recover faster from subsequent price spikes than those that do not.',
+      indiaValidation: 'Seasonal purchasing patterns observed in cooperative dairy and wholesale retail sectors.',
+      limitations: 'Storage capacity and working capital constraints may limit reserve building for small enterprises.',
+    },
+    testCases: [
+      {
+        description: 'Dairy farm with fodder at 0.85x — favorable',
+        inputs: { commodity_price: 0.85 },
+        expectedTriggered: true,
+        expectedRiskDelta: -10,
+        expectedReason: 'Favorable input costs',
+      },
+      {
+        description: 'Retail shop with wholesale at 0.95x — neutral',
+        inputs: { commodity_price: 0.95 },
+        expectedTriggered: false,
+      },
+    ],
+    reviewDate: '2026-07-01',
+  },
+]

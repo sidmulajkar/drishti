@@ -1,0 +1,130 @@
+import type { RuleRecord } from '../../schema'
+
+export const RULES: RuleRecord[] = [
+  {
+    id: 'signal.fodder_price.critical',
+    version: '1.0.0',
+    category: 'threshold',
+    component: 'input_cost_pressure',
+    sector: 'dairy',
+    description: 'Critical fodder price spike — fodder cost exceeds 125% of seasonal baseline, severely compressing dairy margins',
+    condition: {
+      type: 'simple',
+      variable: 'fodder_price',
+      operator: '>',
+      value: 125,
+    },
+    effect: {
+      riskDelta: 25,
+      reason: 'Fodder price exceeds 125% of baseline — severe input cost pressure. Feed constitutes 60-70% of dairy operating costs; this spike compresses margins to unsustainable levels',
+      recommendedAction: 'Explore alternative feed sources (cotton seed cake, groundnut cake), contact cooperative for subsidized feed distribution, consider silage from own farm if available, reduce concentrate ratio while maintaining roughage',
+      confidence: 'high',
+    },
+    researchBasis: {
+      source: 'NDDB Fodder Price Monitoring and CLFMA Feed Cost Reports',
+      url: 'https://nddb.coop/information/fodder',
+      specificFinding: 'Fodder price spikes of 25-50% above baseline occur during drought years — directly impacting dairy farm profitability. Feed is 60-70% of total cost of milk production',
+      indiaValidation: 'CLFMA (Compound Livestock Feed Manufacturers Association) reports confirm feed cost is the single largest expense for Indian dairy farmers — price volatility directly impacts income',
+      limitations: 'Baseline varies by region and season — the 125% threshold uses district-level 3-year rolling average as baseline. Actual impact depends on herd size and feeding practices',
+    },
+    testCases: [
+      {
+        description: 'Dairy farm with fodder price at 130% of baseline — critical spike triggers',
+        inputs: { fodder_price: 130 },
+        expectedTriggered: true,
+        expectedRiskDelta: 25,
+        expectedReason: 'Fodder price exceeds 125% of baseline — severe input cost pressure',
+      },
+      {
+        description: 'Dairy farm with fodder price at 118% of baseline — moderate but below threshold',
+        inputs: { fodder_price: 118 },
+        expectedTriggered: false,
+      },
+    ],
+    reviewDate: '2026-07-01',
+  },
+  {
+    id: 'signal.fodder_price.elevated',
+    version: '1.0.0',
+    category: 'threshold',
+    component: 'input_cost_pressure',
+    sector: 'dairy',
+    description: 'Elevated fodder price — fodder cost exceeds 115% of seasonal baseline, increasing dairy operating costs',
+    condition: {
+      type: 'simple',
+      variable: 'fodder_price',
+      operator: '>',
+      value: 115,
+    },
+    effect: {
+      riskDelta: 15,
+      reason: 'Fodder price exceeds 115% of baseline — moderate input cost pressure. Dairy margins tightening as feed costs consume a larger share of revenue',
+      recommendedAction: 'Optimize feed formulation to maintain nutrition at lower cost, negotiate bulk purchase discounts with cooperative, explore local by-product alternatives (brewery grains, vegetable waste)',
+      confidence: 'high',
+    },
+    researchBasis: {
+      source: 'NDDB Fodder Price Monitoring and CLFMA Feed Cost Reports',
+      url: 'https://nddb.coop/information/fodder',
+      specificFinding: 'Feed cost increases of 15-25% above baseline are common during lean fodder seasons (March-June) even in normal monsoon years — manageable but requires feed management',
+      indiaValidation: 'NDDB fodder price data shows seasonal spikes of 15-20% are regular occurrences in western and central India during summer months',
+      limitations: 'Cooperative dairy farmers may get subsidized feed buffers — impact is higher for independent dairy operators',
+    },
+    testCases: [
+      {
+        description: 'Dairy farm with fodder price at 120% of baseline — elevated cost triggers',
+        inputs: { fodder_price: 120 },
+        expectedTriggered: true,
+        expectedRiskDelta: 15,
+        expectedReason: 'Fodder price exceeds 115% of baseline — moderate input cost pressure',
+      },
+      {
+        description: 'Dairy farm with fodder price at 110% of baseline — normal seasonal variation',
+        inputs: { fodder_price: 110 },
+        expectedTriggered: false,
+      },
+    ],
+    reviewDate: '2026-07-01',
+  },
+  {
+    id: 'signal.fodder_price.favorable',
+    version: '1.0.0',
+    category: 'threshold',
+    component: 'input_cost_pressure',
+    sector: 'dairy',
+    description: 'Favorable fodder prices — fodder cost below 90% of baseline, reducing input cost pressure on dairy operations',
+    condition: {
+      type: 'simple',
+      variable: 'fodder_price',
+      operator: '<',
+      value: 90,
+    },
+    effect: {
+      riskDelta: -10,
+      reason: 'Fodder price below 90% of baseline — favorable input costs. Abundant green fodder availability reducing feed expense and improving dairy margins',
+      recommendedAction: 'Consider building silage stocks at current low prices for future buffer, increase herd productivity through better nutrition, explore premium milk contracts while margins are healthy',
+      confidence: 'medium',
+    },
+    researchBasis: {
+      source: 'NDDB Fodder Price Monitoring',
+      url: 'https://nddb.coop/information/fodder',
+      specificFinding: 'Post-monsoon surplus (Oct-Dec) regularly sees fodder prices 10-20% below baseline — optimal period for building feed reserves',
+      indiaValidation: 'NDDB cooperative data shows consistent post-monsoon fodder price dip — best window for dairy farmers to build silage and hay reserves',
+      limitations: 'Favorable prices are seasonal and temporary — savings should be invested in storage rather than expanded herd',
+    },
+    testCases: [
+      {
+        description: 'Dairy farm with fodder price at 82% of baseline — favorable cost triggers risk reduction',
+        inputs: { fodder_price: 82 },
+        expectedTriggered: true,
+        expectedRiskDelta: -10,
+        expectedReason: 'Fodder price below 90% of baseline — favorable input costs',
+      },
+      {
+        description: 'Dairy farm with fodder price at 95% of baseline — near baseline',
+        inputs: { fodder_price: 95 },
+        expectedTriggered: false,
+      },
+    ],
+    reviewDate: '2026-07-01',
+  },
+]

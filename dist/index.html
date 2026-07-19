@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Drishti — Making Rural India's 63M Micro Enterprises Visible</title>
+  <meta name="description" content="Deterministic, explainable cash flow risk scoring for 63 million rural micro enterprises. Rulebook-driven engine with 50+ configurable rules. No black boxes." />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+        }
+      }
+    }
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    * { font-family: 'Inter', system-ui, sans-serif; }
+    .gradient-text {
+      background: linear-gradient(135deg, #0d9488 0%, #0891b2 50%, #7c3aed 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .hero-gradient {
+      background: radial-gradient(ellipse 80% 50% at 50% -20%, rgba(13, 148, 136, 0.08), transparent),
+                  radial-gradient(ellipse 60% 40% at 80% 50%, rgba(124, 58, 237, 0.04), transparent);
+    }
+    .dark .hero-gradient {
+      background: radial-gradient(ellipse 80% 50% at 50% -20%, rgba(13, 148, 136, 0.15), transparent),
+                  radial-gradient(ellipse 60% 40% at 80% 50%, rgba(124, 58, 237, 0.08), transparent);
+    }
+    .card-hover { transition: all 0.2s ease; }
+    .card-hover:hover { transform: translateY(-2px); box-shadow: 0 8px 24px -8px rgba(0, 0, 0, 0.1); }
+    .dark .card-hover:hover { box-shadow: 0 8px 24px -8px rgba(0, 0, 0, 0.4); }
+    .fade-in { animation: fadeIn 0.6s ease-out forwards; opacity: 0; }
+    @keyframes fadeIn { to { opacity: 1; } }
+    .delay-1 { animation-delay: 0.1s; }
+    .delay-2 { animation-delay: 0.2s; }
+    .delay-3 { animation-delay: 0.3s; }
+    .delay-4 { animation-delay: 0.4s; }
+    .delay-5 { animation-delay: 0.5s; }
+    .delay-6 { animation-delay: 0.6s; }
+    .grid-bg {
+      background-image: radial-gradient(circle at 1px 1px, rgba(13, 148, 136, 0.05) 1px, transparent 0);
+      background-size: 40px 40px;
+    }
+    .dark .grid-bg {
+      background-image: radial-gradient(circle at 1px 1px, rgba(13, 148, 136, 0.08) 1px, transparent 0);
+    }
+    html { scroll-behavior: smooth; }
+    .score-ring { width: 80px; height: 80px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: 700; }
+    .trap-line { border-left: 3px solid #ef4444; padding-left: 12px; }
+  </style>
+  <script>
+    if (localStorage.getItem('drishti-dark') === 'true' || (!localStorage.getItem('drishti-dark') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+      document.documentElement.classList.add('dark');
+    }
+    function toggleDark() {
+      document.documentElement.classList.toggle('dark');
+      localStorage.setItem('drishti-dark', document.documentElement.classList.contains('dark'));
+    }
+  </script>
+</head>
+<body class="bg-white dark:bg-[#0f1117] text-gray-800 dark:text-gray-200 antialiased transition-colors">
+
+  <!-- Nav -->
+  <nav class="fixed top-0 w-full z-50 bg-white/80 dark:bg-[#0f1117]/80 backdrop-blur-xl border-b border-gray-100 dark:border-gray-800">
+    <div class="max-w-6xl mx-auto px-6 h-14 flex items-center justify-between">
+      <a href="/" class="flex items-center gap-2.5">
+        <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-teal-600 to-cyan-500 flex items-center justify-center">
+          <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+          </svg>
+        </div>
+        <span class="text-base font-bold tracking-tight text-gray-800 dark:text-gray-200">Drishti</span>
+      </a>
+      <div class="flex items-center gap-3">
+        <span class="text-xs text-gray-400 font-mono hidden sm:block">NABARD Hackathon @ GFF 2026</span>
+        <button onclick="toggleDark()" class="w-8 h-8 rounded-lg border border-gray-200 dark:border-gray-700 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors" title="Toggle dark mode">
+          <svg class="w-4 h-4 text-gray-600 dark:text-amber-400 hidden dark:block" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" /></svg>
+          <svg class="w-4 h-4 text-gray-600 dark:text-amber-400 block dark:hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" /></svg>
+        </button>
+        <a href="/app/" class="px-3.5 py-1.5 bg-teal-600 hover:bg-teal-700 text-white rounded-lg text-sm font-medium transition-colors">Launch Demo</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <section class="relative min-h-[85vh] flex items-center hero-gradient grid-bg pt-14">
+    <div class="max-w-6xl mx-auto px-6 py-20 md:py-28">
+      <div class="max-w-3xl">
+        <div class="fade-in delay-1 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-teal-50 dark:bg-teal-900/30 border border-teal-200 dark:border-teal-800 text-teal-700 dark:text-teal-400 text-xs font-medium mb-6">
+          <span class="w-1.5 h-1.5 rounded-full bg-teal-500 animate-pulse"></span>
+          NABARD Hackathon @ GFF 2026
+        </div>
+        <h1 class="fade-in delay-2 text-4xl md:text-6xl font-bold tracking-tight leading-[1.1] mb-5 text-gray-900 dark:text-white">
+          The bank sees a healthy business.<br/>
+          <span class="gradient-text">Drishti sees what happens next.</span>
+        </h1>
+        <p class="fade-in delay-3 text-lg md:text-xl text-gray-500 dark:text-gray-400 leading-relaxed mb-8 max-w-2xl">
+          63 million rural micro enterprises power India's economy but remain invisible to the financial system.
+          Drishti scores cash flow risk using 50+ explainable rules &mdash;
+          tracing debt across 5 layers the bank never sees.
+        </p>
+        <div class="fade-in delay-4 flex flex-col sm:flex-row gap-3">
+          <a href="/app/" class="inline-flex items-center justify-center gap-2 px-6 py-3 bg-teal-600 hover:bg-teal-700 text-white rounded-xl text-base font-semibold transition-all shadow-lg shadow-teal-600/20 hover:shadow-teal-600/30">
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" /><path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+            Launch Demo
+          </a>
+          <a href="#story" class="inline-flex items-center justify-center gap-2 px-6 py-3 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-xl text-base font-medium transition-colors">
+            See the Story
+          </a>
+        </div>
+      </div>
+      <div class="fade-in delay-5 grid grid-cols-2 md:grid-cols-4 gap-5 mt-16 pt-8 border-t border-gray-200/60 dark:border-gray-800/60">
+        <div>
+          <p class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">63M</p>
+          <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Rural micro enterprises</p>
+          <p class="text-[10px] text-gray-400 dark:text-gray-500 mt-0.5">MSME Census 2024</p>
+        </div>
+        <div>
+          <p class="text-2xl md:text-3xl font-bold text-teal-600">5</p>
+          <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Sectors mapped</p>
+        </div>
+        <div>
+          <p class="text-2xl md:text-3xl font-bold text-blue-600">50+</p>
+          <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Rulebook rules</p>
+        </div>
+        <div>
+          <p class="text-2xl md:text-3xl font-bold text-purple-600">0</p>
+          <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Black boxes</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- The Scale Problem -->
+  <section class="py-16 border-t border-gray-100 dark:border-gray-800">
+    <div class="max-w-6xl mx-auto px-6 text-center">
+      <div class="max-w-3xl mx-auto">
+        <h2 class="text-3xl md:text-4xl font-bold tracking-tight text-gray-900 dark:text-white mb-6">
+          63M enterprises. 479 DDMs.
+        </h2>
+        <p class="text-lg text-gray-500 dark:text-gray-400 leading-relaxed mb-4">
+          That's <strong class="text-gray-900 dark:text-white font-semibold">~131,500 enterprises per district</strong>.
+          At 8 visits per day, 250 working days a year &mdash; it takes <strong class="text-gray-900 dark:text-white font-semibold">~66 years</strong> to visit each enterprise once.
+        </p>
+        <p class="text-base text-gray-600 dark:text-gray-300 font-medium">
+          Remote risk monitoring isn't optional. It's the only way.
+        </p>
+      </div>
+      <div class="grid grid-cols-3 gap-6 mt-10 max-w-lg mx-auto">
+        <div>
+          <p class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white">63M</p>
+          <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Rural micro enterprises</p>
+          <p class="text-[10px] text-gray-400 dark:text-gray-500">MSME Census 2024</p>
+        </div>
+        <div>
+          <p class="text-3xl md:text-4xl font-bold text-teal-600">479</p>
+          <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">DDM districts</p>
+          <p class="text-[10px] text-gray-400 dark:text-gray-500">NABARD structure</p>
+        </div>
+        <div>
+          <p class="text-3xl md:text-4xl font-bold text-red-600">~66yr</p>
+          <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">To visit each once</p>
+          <p class="text-[10px] text-gray-400 dark:text-gray-500">At 8 visits/day</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- The Pattern: Enterprise ≠ Household -->
+  <section id="story" class="py-20 border-t border-gray-100 dark:border-gray-800">
+    <div class="max-w-6xl mx-auto px-6">
+      <div class="max-w-2xl mb-12">
+        <p class="text-teal-600 text-sm font-semibold tracking-wider uppercase mb-3">The Pattern</p>
+        <h2 class="text-3xl md:text-4xl font-bold tracking-tight text-gray-900 dark:text-white mb-4">Enterprise health &ne; household health</h2>
+        <p class="text-gray-500 dark:text-gray-400 text-lg leading-relaxed">
+          Across 63M rural enterprises, the same pattern repeats: the business looks healthy on paper,
+          but 5 layers of hidden household debt tell a different story. Drishti sees both.
+        </p>
+      </div>
+
+      <div class="grid md:grid-cols-2 gap-8">
+        <!-- Left: The Trap -->
+        <div class="space-y-5">
+          <!-- Enterprise Layer -->
+          <div class="p-5 rounded-2xl bg-emerald-50 dark:bg-emerald-900/15 border border-emerald-200 dark:border-emerald-800/40">
+            <div class="flex items-center justify-between mb-3">
+              <h3 class="font-semibold text-emerald-800 dark:text-emerald-300 text-sm">Enterprise Layer</h3>
+              <div class="flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                <span class="text-xs font-medium text-emerald-600 dark:text-emerald-400">Healthy</span>
+              </div>
+            </div>
+            <div class="grid grid-cols-3 gap-3">
+              <div>
+                <p class="text-2xl font-bold text-emerald-700 dark:text-emerald-300">&#x20B9;67K</p>
+                <p class="text-xs text-emerald-600/70 dark:text-emerald-400/60">Avg revenue/mo</p>
+              </div>
+              <div>
+                <p class="text-2xl font-bold text-emerald-700 dark:text-emerald-300">15x</p>
+                <p class="text-xs text-emerald-600/70 dark:text-emerald-400/60">Enterprise DSCR</p>
+              </div>
+              <div>
+                <p class="text-2xl font-bold text-emerald-700 dark:text-emerald-300">&#x20B9;35K</p>
+                <p class="text-xs text-emerald-600/70 dark:text-emerald-400/60">Savings</p>
+              </div>
+            </div>
+            <p class="text-xs text-emerald-600/60 dark:text-emerald-400/50 mt-3">Revenue &#x20B9;67K avg, EMI &#x20B9;4.5K &mdash; enterprise-only DSCR is 15x. Looks great on paper.</p>
+          </div>
+
+          <!-- The Arrow -->
+          <div class="flex items-center gap-3 px-2">
+            <div class="h-px flex-1 bg-red-200 dark:bg-red-800/40"></div>
+            <span class="text-red-500 text-xs font-semibold uppercase tracking-wider">But look deeper</span>
+            <div class="h-px flex-1 bg-red-200 dark:bg-red-800/40"></div>
+          </div>
+
+          <!-- Household Layer -->
+          <div class="p-5 rounded-2xl bg-red-50 dark:bg-red-900/15 border border-red-200 dark:border-red-800/40 trap-line">
+            <div class="flex items-center justify-between mb-3">
+              <h3 class="font-semibold text-red-800 dark:text-red-300 text-sm">Household Layer</h3>
+              <div class="flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-red-500"></span>
+                <span class="text-xs font-medium text-red-600 dark:text-red-400">Debt Trap</span>
+              </div>
+            </div>
+            <div class="space-y-2.5">
+              <div class="flex justify-between items-center text-sm">
+                <span class="text-red-700/80 dark:text-red-300/70">Formal EMI</span>
+                <span class="font-mono font-medium text-red-700 dark:text-red-300">&#x20B9;4,500</span>
+              </div>
+              <div class="flex justify-between items-center text-sm">
+                <span class="text-red-700/80 dark:text-red-300/70">SHG internal lending</span>
+                <span class="font-mono font-medium text-red-700 dark:text-red-300">&#x20B9;2,500</span>
+              </div>
+              <div class="flex justify-between items-center text-sm">
+                <span class="text-red-700/80 dark:text-red-300/70">Feed supplier credit</span>
+                <span class="font-mono font-medium text-red-700 dark:text-red-300">&#x20B9;3,000</span>
+              </div>
+              <div class="flex justify-between items-center text-sm">
+                <span class="text-red-700/80 dark:text-red-300/70">Moneylender (spouse treatment)</span>
+                <span class="font-mono font-medium text-red-700 dark:text-red-300">&#x20B9;2,000</span>
+              </div>
+              <div class="border-t border-red-200 dark:border-red-800/40 pt-2 mt-2 flex justify-between items-center text-sm font-semibold">
+                <span class="text-red-800 dark:text-red-300">True disposable income</span>
+                <span class="font-mono text-red-700 dark:text-red-300">&#x20B9;10K/mo NEGATIVE</span>
+              </div>
+            </div>
+            <p class="text-xs text-red-600/60 dark:text-red-400/50 mt-3">Husband stopped earning (back injury). 4 dependents, 1 earner. &#x20B9;12K/mo debt from 4 hidden sources.</p>
+          </div>
+
+          <!-- Savings Floor -->
+          <div class="p-4 rounded-xl bg-amber-50 dark:bg-amber-900/15 border border-amber-200 dark:border-amber-800/40">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-xs font-semibold text-amber-700 dark:text-amber-400 uppercase tracking-wider">Savings Floor</p>
+                <p class="text-sm text-amber-600/80 dark:text-amber-400/70 mt-0.5">39 days until completely broke</p>
+              </div>
+              <div class="text-right">
+                <p class="text-xl font-bold text-amber-600">&#x20B9;35K</p>
+                <p class="text-xs text-amber-500">covers 1.3 months</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: What Drishti Sees -->
+        <div class="flex flex-col justify-center">
+          <div class="p-6 rounded-2xl bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 shadow-sm">
+            <p class="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-4">What Drishti Sees</p>
+
+            <div class="flex items-center gap-4 mb-5">
+              <div class="score-ring bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400">50</div>
+              <div>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Risk Score (0&ndash;100)</p>
+                <p class="font-semibold text-amber-600">Yellow &mdash; watch condition</p>
+              </div>
+            </div>
+
+            <div class="space-y-3 mb-5">
+              <div class="flex items-center justify-between text-sm">
+                <span class="text-gray-500 dark:text-gray-400">Enterprise DSCR</span>
+                <span class="font-mono text-emerald-600">15x (healthy)</span>
+              </div>
+              <div class="flex items-center justify-between text-sm">
+                <span class="text-gray-500 dark:text-gray-400">Household DSCR</span>
+                <span class="font-mono text-red-600">0.7x (critical)</span>
+              </div>
+              <div class="flex items-center justify-between text-sm">
+                <span class="text-gray-500 dark:text-gray-400">Cash Runway</span>
+                <span class="font-mono text-red-600">1.3 months</span>
+              </div>
+              <div class="flex items-center justify-between text-sm">
+                <span class="text-gray-500 dark:text-gray-400">Savings Floor</span>
+                <span class="font-mono text-amber-600">Caution (2.9x EMI)</span>
+              </div>
+            </div>
+
+            <div class="p-3 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-100 dark:border-amber-800/50 mb-3">
+              <p class="text-xs text-amber-700 dark:text-amber-400 leading-relaxed">
+                <strong>Household trap detected:</strong> 5-layer debt stacking consumes &#x20B9;12K/mo from &#x20B9;8K income.
+                Enterprise-only DSCR is 15x &mdash; but household DSCR craters to 0.7x. One medical bill from distress.
+              </p>
+            </div>
+
+            <div class="p-3 rounded-xl bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800/50">
+              <p class="text-xs text-blue-700 dark:text-blue-400 leading-relaxed">
+                <strong>Action:</strong> Build 3-month savings buffer via SHG weekly commitment (&#x20B9;2,500/mo). Restructure informal loan through BRC. Estimated &#x20B9;5K/mo savings from consolidation.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- How It Works: 7 Components -->
+  <section id="engine" class="py-20 border-t border-gray-100 dark:border-gray-800 bg-gradient-to-b from-teal-50/50 to-white dark:from-teal-900/10 dark:to-[#0f1117]">
+    <div class="max-w-6xl mx-auto px-6">
+      <div class="max-w-2xl mb-12">
+        <p class="text-teal-600 text-sm font-semibold tracking-wider uppercase mb-3">The Engine</p>
+        <h2 class="text-3xl md:text-4xl font-bold tracking-tight text-gray-900 dark:text-white mb-4">7 components. 50+ rules. Every number explained.</h2>
+        <p class="text-gray-500 dark:text-gray-400 text-lg leading-relaxed">
+          Each enterprise is scored across 7 risk components. Rules are configurable per sector &mdash;
+          dairy weighs feed costs more heavily, retail weighs udhaar recovery. No black boxes.
+        </p>
+      </div>
+
+      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div class="card-hover p-5 rounded-2xl bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 shadow-sm">
+          <div class="flex items-center gap-3 mb-3">
+            <div class="w-9 h-9 rounded-lg bg-emerald-50 dark:bg-emerald-900/30 flex items-center justify-center">
+              <span class="text-emerald-600 font-bold text-xs">25%</span>
+            </div>
+            <h4 class="font-semibold text-gray-900 dark:text-white text-sm">Cash Runway</h4>
+          </div>
+          <p class="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">Months until savings are depleted. The single most important number for a credit officer.</p>
+        </div>
+
+        <div class="card-hover p-5 rounded-2xl bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 shadow-sm">
+          <div class="flex items-center gap-3 mb-3">
+            <div class="w-9 h-9 rounded-lg bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center">
+              <span class="text-blue-600 font-bold text-xs">20%</span>
+            </div>
+            <h4 class="font-semibold text-gray-900 dark:text-white text-sm">DSCR</h4>
+          </div>
+          <p class="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">Debt Service Coverage Ratio &mdash; uses the WORSE of enterprise DSCR and household DSCR. Indian banks require &ge;1.25x.</p>
+        </div>
+
+        <div class="card-hover p-5 rounded-2xl bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 shadow-sm">
+          <div class="flex items-center gap-3 mb-3">
+            <div class="w-9 h-9 rounded-lg bg-purple-50 dark:bg-purple-900/30 flex items-center justify-center">
+              <span class="text-purple-600 font-bold text-xs">20%</span>
+            </div>
+            <h4 class="font-semibold text-gray-900 dark:text-white text-sm">Income Stability</h4>
+          </div>
+          <p class="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">Coefficient of Variation of monthly income &mdash; consistency matters more than volume.</p>
+        </div>
+
+        <div class="card-hover p-5 rounded-2xl bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 shadow-sm">
+          <div class="flex items-center gap-3 mb-3">
+            <div class="w-9 h-9 rounded-lg bg-amber-50 dark:bg-amber-900/30 flex items-center justify-center">
+              <span class="text-amber-600 font-bold text-xs">10%</span>
+            </div>
+            <h4 class="font-semibold text-gray-900 dark:text-white text-sm">Seasonal Position</h4>
+          </div>
+          <p class="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">Sector-specific peak and trough periods. Dairy in May (lean) vs November (flush) are completely different risk profiles.</p>
+        </div>
+
+        <div class="card-hover p-5 rounded-2xl bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 shadow-sm">
+          <div class="flex items-center gap-3 mb-3">
+            <div class="w-9 h-9 rounded-lg bg-rose-50 dark:bg-rose-900/30 flex items-center justify-center">
+              <span class="text-rose-600 font-bold text-xs">10%</span>
+            </div>
+            <h4 class="font-semibold text-gray-900 dark:text-white text-sm">Input Cost Pressure</h4>
+          </div>
+          <p class="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">Feed price spikes, disease outbreaks, monsoon disruptions. Dairy-weighted 1.5x &mdash; feed is 60-70% of cost.</p>
+        </div>
+
+        <div class="card-hover p-5 rounded-2xl bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 shadow-sm">
+          <div class="flex items-center gap-3 mb-3">
+            <div class="w-9 h-9 rounded-lg bg-cyan-50 dark:bg-cyan-900/30 flex items-center justify-center">
+              <span class="text-cyan-600 font-bold text-xs">10%</span>
+            </div>
+            <h4 class="font-semibold text-gray-900 dark:text-white text-sm">Recovery Quality</h4>
+          </div>
+          <p class="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">Udhaar recovery rate. For kirana stores, 40-90% of revenue is credit &mdash; defaults destroy cash flow. Retail-weighted 1.8x.</p>
+        </div>
+
+        <div class="card-hover p-5 rounded-2xl bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 shadow-sm sm:col-span-2 lg:col-span-1">
+          <div class="flex items-center gap-3 mb-3">
+            <div class="w-9 h-9 rounded-lg bg-gray-50 dark:bg-gray-800 flex items-center justify-center">
+              <span class="text-gray-600 font-bold text-xs">5%</span>
+            </div>
+            <h4 class="font-semibold text-gray-900 dark:text-white text-sm">External Risk</h4>
+          </div>
+          <p class="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">Dynamic CV-based market competition risk. Context signal, not primary driver.</p>
+        </div>
+      </div>
+
+      <!-- Sector Weight Adjustments -->
+      <div class="mt-10 p-5 rounded-2xl bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 shadow-sm">
+        <p class="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-4">Sector-Specific Weight Adjustments</p>
+        <div class="grid sm:grid-cols-2 lg:grid-cols-5 gap-4">
+          <div class="text-center">
+            <p class="text-lg mb-1">&#x1F404;</p>
+            <p class="text-xs font-medium text-gray-900 dark:text-white">Dairy</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400">Input cost &times;1.5</p>
+          </div>
+          <div class="text-center">
+            <p class="text-lg mb-1">&#x1F3EA;</p>
+            <p class="text-xs font-medium text-gray-900 dark:text-white">Retail</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400">Recovery &times;1.8</p>
+          </div>
+          <div class="text-center">
+            <p class="text-lg mb-1">&#x1F414;</p>
+            <p class="text-xs font-medium text-gray-900 dark:text-white">Poultry</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400">Input cost &times;1.3</p>
+          </div>
+          <div class="text-center">
+            <p class="text-lg mb-1">&#x1F477;</p>
+            <p class="text-xs font-medium text-gray-900 dark:text-white">MGNREGA</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400">Seasonal &times;1.5</p>
+          </div>
+          <div class="text-center">
+            <p class="text-lg mb-1">&#x1F33E;</p>
+            <p class="text-xs font-medium text-gray-900 dark:text-white">Agriculture</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400">Seasonal &times;1.3</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- What Makes Drishti Different -->
+  <section class="py-20 border-t border-gray-100 dark:border-gray-800">
+    <div class="max-w-6xl mx-auto px-6">
+      <div class="max-w-2xl mb-12">
+        <p class="text-teal-600 text-sm font-semibold tracking-wider uppercase mb-3">What's Different</p>
+        <h2 class="text-3xl md:text-4xl font-bold tracking-tight text-gray-900 dark:text-white mb-4">Three things other systems miss</h2>
+        <p class="text-gray-500 dark:text-gray-400 text-lg leading-relaxed">
+          Traditional credit scoring sees the enterprise. Drishti sees the household, the peer group, and the reasoning behind every number.
+        </p>
+      </div>
+
+      <div class="grid md:grid-cols-3 gap-6">
+        <!-- Enterprise ≠ Household -->
+        <div class="card-hover p-6 rounded-2xl bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 shadow-sm">
+          <div class="w-10 h-10 rounded-lg bg-red-50 dark:bg-red-900/30 flex items-center justify-center mb-4">
+            <svg class="w-5 h-5 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" /></svg>
+          </div>
+          <h3 class="font-semibold text-gray-900 dark:text-white mb-2">Enterprise &ne; Household</h3>
+          <p class="text-sm text-gray-500 dark:text-gray-400 leading-relaxed mb-3">
+            The bank sees the enterprise. Drishti traces 5 layers of household debt the bank never sees: formal, SHG internal, trader credit, cooperative, and informal moneylenders.
+          </p>
+          <div class="p-3 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-100 dark:border-amber-800/40">
+            <p class="text-xs text-amber-700 dark:text-amber-400 leading-relaxed">
+              <strong>Savings Floor:</strong> The single best predictor of microfinance default. Shows "days until broke" &mdash; the number that matters most.
+            </p>
+          </div>
+        </div>
+
+        <!-- Seasonal ≠ Individual -->
+        <div class="card-hover p-6 rounded-2xl bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 shadow-sm">
+          <div class="w-10 h-10 rounded-lg bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center mb-4">
+            <svg class="w-5 h-5 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3v11.25A2.25 2.25 0 006 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0118 16.5h-2.25m-7.5 0h7.5m-7.5 0l-1 3m8.5-3l1 3m0 0l.5 1.5m-.5-1.5h-9.5m0 0l-.5 1.5m.75-9l3-3 2.148 2.148A12.061 12.061 0 0116.5 7.605" /></svg>
+          </div>
+          <h3 class="font-semibold text-gray-900 dark:text-white mb-2">Seasonal &ne; Individual</h3>
+          <p class="text-sm text-gray-500 dark:text-gray-400 leading-relaxed mb-3">
+            "Is everyone struggling, or just you?" Compares enterprise to district sector peers. Distinguishes seasonal trough from individual distress.
+          </p>
+          <div class="space-y-2">
+            <div class="flex items-center gap-2">
+              <span class="w-3 h-3 rounded-full bg-red-400"></span>
+              <span class="text-xs text-gray-600 dark:text-gray-400"><strong class="text-red-500">Red + low percentile</strong> = individual distress</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="w-3 h-3 rounded-full bg-amber-400"></span>
+              <span class="text-xs text-gray-600 dark:text-gray-400"><strong class="text-amber-500">Amber + seasonal</strong> = expected recovery month</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="w-3 h-3 rounded-full bg-emerald-400"></span>
+              <span class="text-xs text-gray-600 dark:text-gray-400"><strong class="text-emerald-500">At peer level</strong> = monitor, don't intervene</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Every Number Has a Reason -->
+        <div class="card-hover p-6 rounded-2xl bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 shadow-sm">
+          <div class="w-10 h-10 rounded-lg bg-emerald-50 dark:bg-emerald-900/30 flex items-center justify-center mb-4">
+            <svg class="w-5 h-5 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15.3M14.25 3.104c.251.023.501.05.75.082M19.8 15.3l-1.57.393A9.065 9.065 0 0112 15a9.065 9.065 0 00-6.23.693L5 14.5m14.8.8l1.402 1.402c1.232 1.232.65 3.318-1.067 3.611A48.309 48.309 0 0112 21c-2.773 0-5.491-.235-8.135-.687-1.718-.293-2.3-2.379-1.067-3.61L5 14.5" /></svg>
+          </div>
+          <h3 class="font-semibold text-gray-900 dark:text-white mb-2">Every number has a reason</h3>
+          <p class="text-sm text-gray-500 dark:text-gray-400 leading-relaxed mb-3">
+            50+ configurable rules, each with research provenance. A DDM can trace any flag back to its source data. A NABARD economist can adjust thresholds without touching code.
+          </p>
+          <div class="p-3 rounded-lg bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-100 dark:border-emerald-800/40">
+            <p class="text-xs text-emerald-700 dark:text-emerald-400 leading-relaxed">
+              <strong>Confidence layers:</strong> verified (external signals), reported (enterprise data), estimated (household context). Divergence between layers is more informative than the composite score.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- DPI Signals -->
+  <section class="py-20 border-t border-gray-100 dark:border-gray-800 bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-[#0f1117]">
+    <div class="max-w-6xl mx-auto px-6">
+      <div class="max-w-2xl mb-12">
+        <p class="text-teal-600 text-sm font-semibold tracking-wider uppercase mb-3">DPI Integration</p>
+        <h2 class="text-3xl md:text-4xl font-bold tracking-tight text-gray-900 dark:text-white mb-4">Digital Public Infrastructure signals</h2>
+        <p class="text-gray-500 dark:text-gray-400 text-lg leading-relaxed">
+          Drishti integrates with India's DPI stack when available. When signals are missing, the engine works with what it has &mdash; no data, no guess.
+        </p>
+      </div>
+      <div class="grid sm:grid-cols-2 gap-4">
+        <div class="card-hover p-5 rounded-2xl bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 shadow-sm">
+          <div class="flex items-center justify-between mb-2">
+            <h4 class="font-semibold text-gray-900 dark:text-white text-sm">NACH Bounce Rate</h4>
+            <span class="text-[10px] font-medium px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400">SIMULATED</span>
+          </div>
+          <p class="text-xs text-gray-500 dark:text-gray-400">Probability-estimated from DSCR. Strongest single repayment signal.</p>
+        </div>
+        <div class="card-hover p-5 rounded-2xl bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 shadow-sm">
+          <div class="flex items-center justify-between mb-2">
+            <h4 class="font-semibold text-gray-900 dark:text-white text-sm">UPI Transaction Velocity</h4>
+            <span class="text-[10px] font-medium px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400">SIMULATED</span>
+          </div>
+          <p class="text-xs text-gray-500 dark:text-gray-400">7-day vs 30-day ratio with sector-specific penetration rates (dairy 30%, retail 45%).</p>
+        </div>
+        <div class="card-hover p-5 rounded-2xl bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 shadow-sm">
+          <div class="flex items-center justify-between mb-2">
+            <h4 class="font-semibold text-gray-900 dark:text-white text-sm">MGNREGA Demand</h4>
+            <span class="text-[10px] font-medium px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400">SIMULATED</span>
+          </div>
+          <p class="text-xs text-gray-500 dark:text-gray-400">Block-level person-day spike as context signal. Max +10 risk &mdash; correlation is weak (r=0.3).</p>
+        </div>
+        <div class="card-hover p-5 rounded-2xl bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 shadow-sm">
+          <div class="flex items-center justify-between mb-2">
+            <h4 class="font-semibold text-gray-900 dark:text-white text-sm">Mandi Prices</h4>
+            <span class="text-[10px] font-medium px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400">SIMULATED</span>
+          </div>
+          <p class="text-xs text-gray-500 dark:text-gray-400">Input cost vs MSP ratio with seasonal adjustment. Stress if price &gt;15% above baseline.</p>
+        </div>
+      </div>
+      <p class="text-xs text-gray-400 dark:text-gray-500 mt-4 text-center">All 4 signals are simulated for demo. Production deployment would connect to NPCI, NREGASoft, and Agmarknet APIs.</p>
+    </div>
+  </section>
+
+  <!-- Who Drishti Is Built For -->
+  <section class="py-20 border-t border-gray-100 dark:border-gray-800">
+    <div class="max-w-6xl mx-auto px-6">
+      <div class="max-w-2xl mb-12">
+        <p class="text-teal-600 text-sm font-semibold tracking-wider uppercase mb-3">Who It's For</p>
+        <h2 class="text-3xl md:text-4xl font-bold tracking-tight text-gray-900 dark:text-white mb-4">Built for two audiences</h2>
+        <p class="text-gray-500 dark:text-gray-400 text-lg leading-relaxed">
+          The DDM who can't visit 131,500 enterprises. The economist who can't wait 3 months for a developer.
+        </p>
+      </div>
+      <div class="grid md:grid-cols-2 gap-6">
+        <!-- DDMs -->
+        <div class="p-6 rounded-2xl bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 shadow-sm">
+          <div class="w-10 h-10 rounded-lg bg-teal-50 dark:bg-teal-900/30 flex items-center justify-center mb-4">
+            <svg class="w-5 h-5 text-teal-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3v11.25A2.25 2.25 0 006 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0118 16.5h-2.25m-7.5 0h7.5m-7.5 0l-1 3m8.5-3l1 3m0 0l.5 1.5m-.5-1.5h-9.5m0 0l-.5 1.5m.75-9l3-3 2.148 2.148A12.061 12.061 0 0116.5 7.605" /></svg>
+          </div>
+          <h3 class="font-semibold text-gray-900 dark:text-white mb-3">For 479 DDMs across India</h3>
+          <ul class="space-y-2.5">
+            <li class="flex items-start gap-2 text-sm text-gray-500 dark:text-gray-400">
+              <span class="w-1.5 h-1.5 rounded-full bg-teal-500 mt-1.5 flex-shrink-0"></span>
+              See all enterprises in your district, color-coded by risk level
+            </li>
+            <li class="flex items-start gap-2 text-sm text-gray-500 dark:text-gray-400">
+              <span class="w-1.5 h-1.5 rounded-full bg-teal-500 mt-1.5 flex-shrink-0"></span>
+              Drill down into 5-layer household debt the bank never sees
+            </li>
+            <li class="flex items-start gap-2 text-sm text-gray-500 dark:text-gray-400">
+              <span class="w-1.5 h-1.5 rounded-full bg-teal-500 mt-1.5 flex-shrink-0"></span>
+              Distinguish seasonal trough from individual distress via peer comparison
+            </li>
+            <li class="flex items-start gap-2 text-sm text-gray-500 dark:text-gray-400">
+              <span class="w-1.5 h-1.5 rounded-full bg-teal-500 mt-1.5 flex-shrink-0"></span>
+              Every score has a full explanation &mdash; trace any flag to source data
+            </li>
+          </ul>
+        </div>
+        <!-- Economists -->
+        <div class="p-6 rounded-2xl bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 shadow-sm">
+          <div class="w-10 h-10 rounded-lg bg-purple-50 dark:bg-purple-900/30 flex items-center justify-center mb-4">
+            <svg class="w-5 h-5 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15.3M14.25 3.104c.251.023.501.05.75.082M19.8 15.3l-1.57.393A9.065 9.065 0 0112 15a9.065 9.065 0 00-6.23.693L5 14.5m14.8.8l1.402 1.402c1.232 1.232.65 3.318-1.067 3.611A48.309 48.309 0 0112 21c-2.773 0-5.491-.235-8.135-.687-1.718-.293-2.3-2.379-1.067-3.61L5 14.5" /></svg>
+          </div>
+          <h3 class="font-semibold text-gray-900 dark:text-white mb-3">For NABARD economists &amp; policy designers</h3>
+          <ul class="space-y-2.5">
+            <li class="flex items-start gap-2 text-sm text-gray-500 dark:text-gray-400">
+              <span class="w-1.5 h-1.5 rounded-full bg-purple-500 mt-1.5 flex-shrink-0"></span>
+              Every threshold is a configurable rule &mdash; change a feed cost trigger without touching code
+            </li>
+            <li class="flex items-start gap-2 text-sm text-gray-500 dark:text-gray-400">
+              <span class="w-1.5 h-1.5 rounded-full bg-purple-500 mt-1.5 flex-shrink-0"></span>
+              Sector-specific weights &mdash; dairy emphasizes input costs, retail emphasizes udhaar recovery
+            </li>
+            <li class="flex items-start gap-2 text-sm text-gray-500 dark:text-gray-400">
+              <span class="w-1.5 h-1.5 rounded-full bg-purple-500 mt-1.5 flex-shrink-0"></span>
+              Research provenance &mdash; every rule cites its source (CGAP, NAFIS, industry practice)
+            </li>
+            <li class="flex items-start gap-2 text-sm text-gray-500 dark:text-gray-400">
+              <span class="w-1.5 h-1.5 rounded-full bg-purple-500 mt-1.5 flex-shrink-0"></span>
+              Version tracking &mdash; see what changed, when, why, and what's due for review
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Sectors -->
+  <section class="py-20 border-t border-gray-100 dark:border-gray-800">
+    <div class="max-w-6xl mx-auto px-6">
+      <div class="max-w-2xl mb-12">
+        <p class="text-teal-600 text-sm font-semibold tracking-wider uppercase mb-3">Sectors</p>
+        <h2 class="text-3xl md:text-4xl font-bold tracking-tight text-gray-900 dark:text-white mb-4">Built for rural India's real economy</h2>
+        <p class="text-gray-500 dark:text-gray-400 text-lg leading-relaxed">
+          Each sector has unique seasonal rhythms, cost structures, and risk factors. Drishti maps all five.
+        </p>
+      </div>
+      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div class="card-hover p-5 rounded-2xl bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 shadow-sm">
+          <div class="text-2xl mb-2">&#x1F404;</div>
+          <h4 class="font-semibold text-gray-900 dark:text-white text-sm mb-1">Dairy</h4>
+          <p class="text-xs text-gray-500 dark:text-gray-400 mb-2">&#x20B9;84K&ndash;2L/mo &middot; Flush/lean cycles</p>
+          <p class="text-xs text-gray-400 dark:text-gray-500"><span class="text-red-500 font-medium">Pain:</span> Feed cost 60-70%, heat stress, cooperative payment delays</p>
+        </div>
+        <div class="card-hover p-5 rounded-2xl bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 shadow-sm">
+          <div class="text-2xl mb-2">&#x1F3EA;</div>
+          <h4 class="font-semibold text-gray-900 dark:text-white text-sm mb-1">Rural Retail</h4>
+          <p class="text-xs text-gray-500 dark:text-gray-400 mb-2">&#x20B9;1&ndash;3L/mo &middot; Festival demand cycles</p>
+          <p class="text-xs text-gray-400 dark:text-gray-500"><span class="text-red-500 font-medium">Pain:</span> Udhaar trap (40-90% revenue as credit), thin margins</p>
+        </div>
+        <div class="card-hover p-5 rounded-2xl bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 shadow-sm">
+          <div class="text-2xl mb-2">&#x1F414;</div>
+          <h4 class="font-semibold text-gray-900 dark:text-white text-sm mb-1">Poultry</h4>
+          <p class="text-xs text-gray-500 dark:text-gray-400 mb-2">&#x20B9;1.5&ndash;5L/mo &middot; Heat stress mortality</p>
+          <p class="text-xs text-gray-400 dark:text-gray-500"><span class="text-red-500 font-medium">Pain:</span> Feed cost volatility, disease outbreaks, egg price swings</p>
+        </div>
+        <div class="card-hover p-5 rounded-2xl bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 shadow-sm">
+          <div class="text-2xl mb-2">&#x1F477;</div>
+          <h4 class="font-semibold text-gray-900 dark:text-white text-sm mb-1">MGNREGA Wages</h4>
+          <p class="text-xs text-gray-500 dark:text-gray-400 mb-2">&#x20B9;8K&ndash;15K/mo &middot; Monsoon-dependent</p>
+          <p class="text-xs text-gray-400 dark:text-gray-500"><span class="text-red-500 font-medium">Pain:</span> Payment delays, demand-supply mismatch, low wage rates</p>
+        </div>
+        <div class="card-hover p-5 rounded-2xl bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 shadow-sm sm:col-span-2 lg:col-span-1">
+          <div class="text-2xl mb-2">&#x1F33E;</div>
+          <h4 class="font-semibold text-gray-900 dark:text-white text-sm mb-1">Agriculture</h4>
+          <p class="text-xs text-gray-500 dark:text-gray-400 mb-2">&#x20B9;2&ndash;8L/season &middot; Harvest lumps</p>
+          <p class="text-xs text-gray-400 dark:text-gray-500"><span class="text-red-500 font-medium">Pain:</span> Monsoon failure, input cost spikes, post-harvest price crashes</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Built for Reality -->
+  <section class="py-20 border-t border-gray-100 dark:border-gray-800 bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-[#0f1117]">
+    <div class="max-w-6xl mx-auto px-6">
+      <div class="max-w-2xl mb-12">
+        <p class="text-teal-600 text-sm font-semibold tracking-wider uppercase mb-3">Built for Reality</p>
+        <h2 class="text-3xl md:text-4xl font-bold tracking-tight text-gray-900 dark:text-white mb-4">Works where it matters</h2>
+      </div>
+      <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="card-hover p-5 rounded-2xl bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 shadow-sm text-center">
+          <div class="text-2xl mb-2">&#x1F4F6;</div>
+          <h4 class="font-semibold text-gray-900 dark:text-white text-sm mb-1">Works without connectivity</h4>
+          <p class="text-xs text-gray-500 dark:text-gray-400">Dexie.js + Workbox. Runs entirely on the device. Zero server dependency.</p>
+        </div>
+        <div class="card-hover p-5 rounded-2xl bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 shadow-sm text-center">
+          <div class="text-2xl mb-2">&#x1F4AC;</div>
+          <h4 class="font-semibold text-gray-900 dark:text-white text-sm mb-1">Built for the people who do the work</h4>
+          <p class="text-xs text-gray-500 dark:text-gray-400">Hindi/English, voice input, mobile-first. Designed for field officers, not software engineers.</p>
+        </div>
+        <div class="card-hover p-5 rounded-2xl bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 shadow-sm text-center">
+          <div class="text-2xl mb-2">&#x1F4F1;</div>
+          <h4 class="font-semibold text-gray-900 dark:text-white text-sm mb-1">Enterprise &amp; district views</h4>
+          <p class="text-xs text-gray-500 dark:text-gray-400">Enterprise owner sees their data. DDM sees the district. Same engine, different viewports.</p>
+        </div>
+        <div class="card-hover p-5 rounded-2xl bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 shadow-sm text-center">
+          <div class="text-2xl mb-2">&#x2699;&#xFE0F;</div>
+          <h4 class="font-semibold text-gray-900 dark:text-white text-sm mb-1">Every threshold is configurable</h4>
+          <p class="text-xs text-gray-500 dark:text-gray-400">50+ rules with research provenance. A NABARD economist can adjust without a developer.</p>
+        </div>
+      </div>
+      <div class="mt-8 grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div class="p-3 rounded-xl bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 shadow-sm text-center">
+          <p class="text-xl font-bold text-teal-600">50+</p>
+          <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Configurable rules</p>
+          <p class="text-[10px] text-gray-400 dark:text-gray-500 mt-0.5">Versioned, testable</p>
+        </div>
+        <div class="p-3 rounded-xl bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 shadow-sm text-center">
+          <p class="text-xl font-bold text-amber-600">17.4%</p>
+          <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Use moneylenders</p>
+          <p class="text-[10px] text-gray-400 dark:text-gray-500 mt-0.5">NAFIS 2022</p>
+        </div>
+        <div class="p-3 rounded-xl bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 shadow-sm text-center">
+          <p class="text-xl font-bold text-blue-600">5</p>
+          <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Sector profiles</p>
+          <p class="text-[10px] text-gray-400 dark:text-gray-500 mt-0.5">Dairy, retail, poultry, MGNREGA, agriculture</p>
+        </div>
+        <div class="p-3 rounded-xl bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 shadow-sm text-center">
+          <p class="text-xl font-bold text-purple-600">0</p>
+          <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Servers required</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- What Drishti Is / Is Not -->
+  <section class="py-20 border-t border-gray-100 dark:border-gray-800">
+    <div class="max-w-6xl mx-auto px-6">
+      <div class="max-w-2xl mb-12">
+        <p class="text-teal-600 text-sm font-semibold tracking-wider uppercase mb-3">Honest Constraints</p>
+        <h2 class="text-3xl md:text-4xl font-bold tracking-tight text-gray-900 dark:text-white mb-4">What Drishti is and isn't</h2>
+      </div>
+      <div class="grid md:grid-cols-2 gap-6">
+        <div class="p-6 rounded-2xl bg-emerald-50 dark:bg-emerald-900/15 border border-emerald-200 dark:border-emerald-800/40">
+          <h3 class="font-semibold text-emerald-800 dark:text-emerald-300 text-sm mb-4">What Drishti IS</h3>
+          <ul class="space-y-2.5">
+            <li class="flex items-start gap-2 text-sm text-emerald-700/80 dark:text-emerald-300/70">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-1.5 flex-shrink-0"></span>
+              Explainable risk scoring &mdash; every flag has a reason
+            </li>
+            <li class="flex items-start gap-2 text-sm text-emerald-700/80 dark:text-emerald-300/70">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-1.5 flex-shrink-0"></span>
+              5-layer household debt analysis
+            </li>
+            <li class="flex items-start gap-2 text-sm text-emerald-700/80 dark:text-emerald-300/70">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-1.5 flex-shrink-0"></span>
+              Offline-first PWA for rural connectivity
+            </li>
+            <li class="flex items-start gap-2 text-sm text-emerald-700/80 dark:text-emerald-300/70">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-1.5 flex-shrink-0"></span>
+              Configurable rulebook &mdash; no code changes for threshold updates
+            </li>
+            <li class="flex items-start gap-2 text-sm text-emerald-700/80 dark:text-emerald-300/70">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-1.5 flex-shrink-0"></span>
+              Data quality scoring &mdash; low confidence triggers field validation
+            </li>
+          </ul>
+        </div>
+        <div class="p-6 rounded-2xl bg-red-50 dark:bg-red-900/15 border border-red-200 dark:border-red-800/40">
+          <h3 class="font-semibold text-red-800 dark:text-red-300 text-sm mb-4">What Drishti IS NOT</h3>
+          <ul class="space-y-2.5">
+            <li class="flex items-start gap-2 text-sm text-red-700/80 dark:text-red-300/70">
+              <span class="w-1.5 h-1.5 rounded-full bg-red-500 mt-1.5 flex-shrink-0"></span>
+              Not a loan decision engine &mdash; it informs, not decides
+            </li>
+            <li class="flex items-start gap-2 text-sm text-red-700/80 dark:text-red-300/70">
+              <span class="w-1.5 h-1.5 rounded-full bg-red-500 mt-1.5 flex-shrink-0"></span>
+              Not real-time DPI &mdash; signals are simulated in demo
+            </li>
+            <li class="flex items-start gap-2 text-sm text-red-700/80 dark:text-red-300/70">
+              <span class="w-1.5 h-1.5 rounded-full bg-red-500 mt-1.5 flex-shrink-0"></span>
+              Not a credit bureau replacement
+            </li>
+            <li class="flex items-start gap-2 text-sm text-red-700/80 dark:text-red-300/70">
+              <span class="w-1.5 h-1.5 rounded-full bg-red-500 mt-1.5 flex-shrink-0"></span>
+              Not production-ready &mdash; requires Supabase backend and real DPI integration
+            </li>
+            <li class="flex items-start gap-2 text-sm text-red-700/80 dark:text-red-300/70">
+              <span class="w-1.5 h-1.5 rounded-full bg-red-500 mt-1.5 flex-shrink-0"></span>
+              Not a replacement for field officer judgment
+            </li>
+          </ul>
+        </div>
+      </div>
+      <p class="text-center text-sm text-gray-500 dark:text-gray-400 mt-6">
+        Current scope: 9 demo enterprises across 5 sectors. 479 DDM districts, 63M enterprises to reach.
+      </p>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="py-20 border-t border-gray-100 dark:border-gray-800">
+    <div class="max-w-6xl mx-auto px-6 text-center">
+      <h2 class="text-3xl md:text-5xl font-bold tracking-tight text-gray-900 dark:text-white mb-5">
+        See what your district looks like<br class="hidden md:block" /> when every enterprise is visible.
+      </h2>
+      <p class="text-gray-500 dark:text-gray-400 text-lg mb-8 max-w-xl mx-auto">
+        9 demo enterprises across 5 sectors. 50+ configurable rules.
+        Every number explained. Zero setup.
+      </p>
+      <a href="/app/" class="inline-flex items-center gap-2 px-8 py-4 bg-teal-600 hover:bg-teal-700 text-white rounded-xl text-lg font-semibold transition-all shadow-lg shadow-teal-600/20 hover:shadow-teal-600/30">
+        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" /><path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+        Launch Demo
+      </a>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="py-6 border-t border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-900">
+    <div class="max-w-6xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-3">
+      <div class="flex items-center gap-2">
+        <div class="w-5 h-5 rounded-md bg-gradient-to-br from-teal-600 to-cyan-500 flex items-center justify-center">
+          <svg class="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+          </svg>
+        </div>
+        <span class="text-xs text-gray-500 dark:text-gray-400">Drishti &mdash; NABARD Hackathon @ GFF 2026</span>
+      </div>
+      <p class="text-[10px] text-gray-400 dark:text-gray-500">AUC ~0.70 (CGAP 2024) &middot; 17.4% moneylender usage (NAFIS 2022) &middot; 63M enterprises (MSME Census 2024)</p>
+    </div>
+  </footer>
+
+</body>
+</html>

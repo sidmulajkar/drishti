@@ -1,0 +1,130 @@
+import type { RuleRecord } from '../../schema'
+
+export const RULES: RuleRecord[] = [
+  {
+    id: 'signal.ndvi.crop.failure',
+    version: '1.0.0',
+    category: 'threshold',
+    component: 'external_risk',
+    sector: 'agriculture',
+    description: 'Crop failure / bare soil — NDVI below 0.2 indicates virtually no live vegetation, signaling crop failure or fallow land',
+    condition: {
+      type: 'simple',
+      variable: 'ndvi',
+      operator: '<',
+      value: 0.2,
+    },
+    effect: {
+      riskDelta: 25,
+      reason: 'NDVI below 0.2 — bare soil or dead crop. No viable vegetation detected — likely complete crop failure, land degradation, or abandoned field',
+      recommendedAction: 'Activate PMFBY crop insurance claim if applicable, assess soil health card for remediation, consider short-duration pulse crops for soil recovery, apply for drought relief under state disaster response fund',
+      confidence: 'high',
+    },
+    researchBasis: {
+      source: 'ISRO-NRSC Satellite Crop Monitoring (FASAL Scheme)',
+      url: 'https://www.nrcorremote-sensing.gov.in/',
+      specificFinding: 'NDVI < 0.2 across >50% of district area correlates with >70% probability of crop failure — used by ISRO for drought early warning in FASAL operationalization',
+      indiaValidation: 'FASAL (Forecasting Agricultural output using Space, Agro-meteorology and Land based observations) uses NDVI thresholds for crop condition assessment across 500+ districts',
+      limitations: 'NDVI does not distinguish between crop failure and intentional fallow — ground truth validation needed. Cloud cover during monsoon reduces satellite data reliability',
+    },
+    testCases: [
+      {
+        description: 'Agriculture field with NDVI at 0.15 — bare soil / crop failure triggers',
+        inputs: { ndvi: 0.15 },
+        expectedTriggered: true,
+        expectedRiskDelta: 25,
+        expectedReason: 'NDVI below 0.2 — bare soil or dead crop',
+      },
+      {
+        description: 'Agriculture field with NDVI at 0.35 — some vegetation present',
+        inputs: { ndvi: 0.35 },
+        expectedTriggered: false,
+      },
+    ],
+    reviewDate: '2026-07-01',
+  },
+  {
+    id: 'signal.ndvi.poor_vegetation',
+    version: '1.0.0',
+    category: 'threshold',
+    component: 'external_risk',
+    sector: 'agriculture',
+    description: 'Poor vegetation health — NDVI between 0.2-0.3 indicates stressed crops with significantly below-normal growth',
+    condition: {
+      type: 'band',
+      variable: 'ndvi',
+      min: 0.2,
+      max: 0.3,
+    },
+    effect: {
+      riskDelta: 15,
+      reason: 'NDVI between 0.2-0.3 — poor vegetation health. Crops showing stress — yellowing, stunted growth, or pest/disease damage. Yield potential reduced 20-40%',
+      recommendedAction: 'Conduct field inspection for pest/disease identification, apply corrective foliar spray if deficiency-based, ensure adequate irrigation, check for nutrient deficiencies using soil test',
+      confidence: 'high',
+    },
+    researchBasis: {
+      source: 'ISRO-NRSC Satellite Crop Monitoring (FASAL Scheme)',
+      url: 'https://www.nrcorremote-sensing.gov.in/',
+      specificFinding: 'NDVI 0.2-0.3 range indicates stressed vegetation with 20-40% yield reduction expected — below-normal crop vigour requiring intervention',
+      indiaValidation: 'FASAL operational bulletins consistently flag NDVI 0.2-0.3 areas as "poor" crop condition requiring ground-level investigation',
+      limitations: 'Early-season NDVI readings may be misleading — crop canopy not fully developed. Best interpreted mid-season after canopy closure',
+    },
+    testCases: [
+      {
+        description: 'Agriculture field with NDVI at 0.25 — poor vegetation triggers',
+        inputs: { ndvi: 0.25 },
+        expectedTriggered: true,
+        expectedRiskDelta: 15,
+        expectedReason: 'NDVI between 0.2-0.3 — poor vegetation health',
+      },
+      {
+        description: 'Agriculture field with NDVI at 0.45 — moderate vegetation',
+        inputs: { ndvi: 0.45 },
+        expectedTriggered: false,
+      },
+    ],
+    reviewDate: '2026-07-01',
+  },
+  {
+    id: 'signal.ndvi.healthy_crop',
+    version: '1.0.0',
+    category: 'threshold',
+    component: 'external_risk',
+    sector: 'agriculture',
+    description: 'Healthy crop — NDVI above 0.6 indicates vigorous vegetation, reducing external risk as crop conditions are favorable',
+    condition: {
+      type: 'simple',
+      variable: 'ndvi',
+      operator: '>',
+      value: 0.6,
+    },
+    effect: {
+      riskDelta: -10,
+      reason: 'NDVI above 0.6 — healthy, vigorous crop vegetation. Favorable growing conditions reducing agriculture external risk — good yield potential',
+      recommendedAction: 'Maintain current management practices, monitor for late-season pest/disease emergence, plan harvest logistics, consider forward contracts if price outlook is favorable',
+      confidence: 'medium',
+    },
+    researchBasis: {
+      source: 'ISRO-NRSC Satellite Crop Monitoring (FASAL Scheme)',
+      url: 'https://www.nrcorremote-sensing.gov.in/',
+      specificFinding: 'NDVI > 0.6 indicates "good" to "very good" crop condition in FASAL classification — yields within or above normal range expected',
+      indiaValidation: 'FASAL bulletins classify NDVI > 0.6 as "healthy" — historically correlates with above-average production in wheat and rice belts',
+      limitations: 'High NDVI late in season may indicate delayed maturity rather than exceptional health — phenological stage matters. Also high NDVI in non-crop areas (forests) is not relevant',
+    },
+    testCases: [
+      {
+        description: 'Agriculture field with NDVI at 0.72 — healthy crop triggers risk reduction',
+        inputs: { ndvi: 0.72 },
+        expectedTriggered: true,
+        expectedRiskDelta: -10,
+        expectedReason: 'NDVI above 0.6 — healthy, vigorous crop vegetation',
+      },
+      {
+        description: 'Agriculture field with NDVI at 0.5 — moderate vegetation',
+        inputs: { ndvi: 0.5 },
+        expectedTriggered: false,
+      },
+    ],
+    reviewDate: '2026-07-01',
+  },
+]

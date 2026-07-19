@@ -1,0 +1,132 @@
+import type { RuleRecord } from '../schema'
+
+export const RULES: RuleRecord[] = [
+  {
+    id: 'component.seasonal.deep_trough',
+    version: '1.0.0',
+    category: 'seasonal_calendar',
+    component: 'seasonal_position',
+    description: 'Seasonal multiplier below 0.75 — deep seasonal trough. Revenue significantly below annual average.',
+    condition: {
+      type: 'simple',
+      variable: 'seasonal_multiplier',
+      operator: '<=',
+      value: 0.75,
+    },
+    effect: {
+      riskDelta: 25,
+      reason: 'Deep seasonal trough: revenue at less than 75% of annual average. Combined with fixed EMI obligations, this creates severe cash pressure.',
+      recommendedAction: 'Pre-position by building reserves during peak months. Defer discretionary purchases. Consider seasonal EMI restructuring with lender.',
+      confidence: 'high',
+    },
+    researchBasis: {
+      source: 'NDDB – Dairy Seasonality Study (2023)',
+      url: 'https://www.nddb.coop/information/dairy-development',
+      specificFinding: 'Indian dairy output drops 15-30% during summer months (April-June) due to heat stress and reduced fodder availability. Flush season (Oct-Feb) produces 40% more milk.',
+      indiaValidation: 'Confirmed across Gujarat, Rajasthan, and Punjab cooperative data.',
+      limitations: 'Seasonal patterns vary by region — south Indian dairies have different troughs than northern ones.',
+    },
+    testCases: [
+      {
+        description: 'Dairy farm in April with seasonal multiplier 0.65 — deep trough',
+        inputs: { seasonal_multiplier: 0.65 },
+        expectedTriggered: true,
+        expectedRiskDelta: 25,
+        expectedReason: 'Deep seasonal trough',
+      },
+      {
+        description: 'Dairy farm at boundary 0.75 — deep trough inclusive',
+        inputs: { seasonal_multiplier: 0.75 },
+        expectedTriggered: true,
+        expectedRiskDelta: 25,
+        expectedReason: 'Deep seasonal trough',
+      },
+    ],
+    reviewDate: '2026-07-01',
+  },
+  {
+    id: 'component.seasonal.moderate_trough',
+    version: '1.0.0',
+    category: 'seasonal_calendar',
+    component: 'seasonal_position',
+    description: 'Seasonal multiplier below 0.85 — moderate seasonal trough. Revenue below normal but not critical.',
+    condition: {
+      type: 'simple',
+      variable: 'seasonal_multiplier',
+      operator: '<=',
+      value: 0.85,
+    },
+    effect: {
+      riskDelta: 15,
+      reason: 'Moderate seasonal trough: revenue 15%+ below annual average. Manageable with proper planning but increases EMI stress.',
+      recommendedAction: 'Monitor weekly cash flow during trough. Ensure peak-season surplus was saved. Tighten discretionary spending.',
+      confidence: 'medium',
+    },
+    researchBasis: {
+      source: 'IBEF – Indian Retail Industry Report (2025)',
+      url: 'https://www.ibef.org/industry/retail-india',
+      specificFinding: 'Rural retail sees 15-25% revenue dip during monsoon months (July-September) due to reduced footfall and agricultural cash flow delays.',
+      indiaValidation: 'Based on Nielsen rural retail panel data covering 12,000 outlets.',
+      limitations: 'Impact varies by product category — essential goods see smaller dips than discretionary items.',
+    },
+    testCases: [
+      {
+        description: 'Retail shop in July with seasonal multiplier 0.80 — moderate trough',
+        inputs: { seasonal_multiplier: 0.80 },
+        expectedTriggered: true,
+        expectedRiskDelta: 15,
+        expectedReason: 'Moderate seasonal trough',
+      },
+      {
+        description: 'Dairy farm at boundary 0.85 — moderate trough inclusive',
+        inputs: { seasonal_multiplier: 0.85 },
+        expectedTriggered: true,
+        expectedRiskDelta: 15,
+        expectedReason: 'Moderate seasonal trough',
+      },
+    ],
+    reviewDate: '2026-07-01',
+  },
+  {
+    id: 'component.seasonal.peak',
+    version: '1.0.0',
+    category: 'seasonal_calendar',
+    component: 'seasonal_position',
+    description: 'Seasonal multiplier above 1.15 — peak season. Revenue significantly above annual average.',
+    condition: {
+      type: 'simple',
+      variable: 'seasonal_multiplier',
+      operator: '>=',
+      value: 1.15,
+    },
+    effect: {
+      riskDelta: -10,
+      reason: 'Peak season: revenue 15%+ above annual average. Ideal time to build reserves and reduce outstanding obligations.',
+      recommendedAction: 'Maximize collection of outstanding udhaar. Build savings buffer for upcoming trough. Consider prepaying high-interest debt.',
+      confidence: 'medium',
+    },
+    researchBasis: {
+      source: 'NDDB – Dairy Seasonality Study (2023)',
+      specificFinding: 'Flush season (Oct-Feb) produces 30-40% more milk. Enterprises that save 20% of peak surplus can fully cover trough-month EMI obligations.',
+      indiaValidation: 'Gujarat Cooperative Milk Marketing Federation (Amul) seasonal data.',
+      limitations: 'Peak income must actually be saved — behavioral patterns often lead to increased spending during good months.',
+    },
+    testCases: [
+      {
+        description: 'Dairy farm in December with seasonal multiplier 1.25 — peak',
+        inputs: { seasonal_multiplier: 1.25 },
+        expectedTriggered: true,
+        expectedRiskDelta: -10,
+        expectedReason: 'Peak season',
+      },
+      {
+        description: 'Dairy farm at boundary 1.15 — peak inclusive',
+        inputs: { seasonal_multiplier: 1.15 },
+        expectedTriggered: true,
+        expectedRiskDelta: -10,
+        expectedReason: 'Peak season',
+      },
+    ],
+    reviewDate: '2026-07-01',
+  },
+]

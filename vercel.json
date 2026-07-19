@@ -1,0 +1,14 @@
+{
+  "framework": "vite",
+  "rootDirectory": "frontend",
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "installCommand": "npm install",
+  "ignoreCommand": "find . -maxdepth 1 -not -name 'frontend' -not -name '.' -not -name 'vercel.json' -not -name '.gitignore' -not -name '.git' -not -name '.vercelignore' | head -1",
+  "routes": [
+    {
+      "src": "/app/(.*)",
+      "dest": "/app/index.html"
+    }
+  ]
+}

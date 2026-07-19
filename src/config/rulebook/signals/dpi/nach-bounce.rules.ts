@@ -1,0 +1,168 @@
+import type { RuleRecord } from '../../schema'
+
+export const RULES: RuleRecord[] = [
+  {
+    id: 'signal.nach_bounce.critical',
+    version: '1.0.0',
+    category: 'threshold',
+    component: 'debt_service_coverage',
+    description: 'Critical NACH bounce rate — bounce rate above 30% indicates severe repayment distress',
+    condition: {
+      type: 'simple',
+      variable: 'nach_bounce',
+      operator: '>',
+      value: 30,
+    },
+    effect: {
+      riskDelta: 35,
+      reason: 'NACH bounce rate exceeds 30% — critical repayment distress. NACH bounce is a validated leading indicator of microfinance default. Enterprise cannot service existing debt from current income',
+      recommendedAction: 'Immediate field officer visit for household assessment, restructure existing loan before next EMI date, explore emergency bridging from SHG, assess if distress is temporary (cash flow timing) or structural (income collapse)',
+      confidence: 'high',
+    },
+    researchBasis: {
+      source: 'NPCI NACH System Operational Guidelines & CGAP 2024',
+      url: 'https://www.cgap.org/research/publication/leveraging-transactional-data-improve-mse-lending',
+      specificFinding: 'NACH bounce rate >30% is a validated leading indicator of microfinance default based on industry practice. Baseline bounce rate is 3-8% (NPCI operational data). Return code analysis distinguishes technical bounces from distress bounces (NPCI operational framework). Transactional data generally achieves AUC ~0.70 for default prediction (CGAP 2024).',
+      indiaValidation: 'NPCI NACH data covers 500M+ transactions. Bounce rates above 30% in consecutive months are widely used by Indian MFIs as early warning indicators. No single-source accuracy percentage is established in published research for NACH bounce alone.',
+      limitations: 'Bounce may be technical (account balance timing) rather than distress — requires field verification. Some borrowers intentionally skip first NACH to renegotiate terms',
+    },
+    testCases: [
+      {
+        description: 'Enterprise with NACH bounce rate at 35% — critical distress triggers',
+        inputs: { nach_bounce: 35 },
+        expectedTriggered: true,
+        expectedRiskDelta: 35,
+        expectedReason: 'NACH bounce rate exceeds 30% — critical repayment distress',
+      },
+      {
+        description: 'Enterprise with NACH bounce rate at 25% — below critical threshold',
+        inputs: { nach_bounce: 25 },
+        expectedTriggered: false,
+      },
+    ],
+    reviewDate: '2026-07-01',
+  },
+  {
+    id: 'signal.nach_bounce.severe',
+    version: '1.0.0',
+    category: 'threshold',
+    component: 'debt_service_coverage',
+    description: 'Severe NACH bounce rate — bounce rate between 20-30% indicates serious repayment difficulty and DSCR likely below 1.0',
+    condition: {
+      type: 'band',
+      variable: 'nach_bounce',
+      min: 20,
+      max: 30,
+    },
+    effect: {
+      riskDelta: 25,
+      reason: 'NACH bounce rate between 20-30% — severe repayment difficulty. Enterprise is struggling to maintain EMI payments; DSCR likely below 1.0 meaning income cannot cover debt obligations',
+      recommendedAction: 'Schedule field visit within 1 week, review cash flow to determine if timing issue or structural deficit, explore loan rescheduling options, check if household debt stacking is contributing',
+      confidence: 'high',
+    },
+    researchBasis: {
+      source: 'NPCI NACH System Operational Guidelines & CGAP 2024',
+      url: 'https://www.cgap.org/research/publication/leveraging-transactional-data-improve-mse-lending',
+      specificFinding: 'NACH bounce rate 20-30% is a strong early warning signal in industry practice — enterprises in this range show elevated risk of serious delinquency (90+ days). Transactional data generally achieves AUC ~0.70 for default prediction (CGAP 2024).',
+      indiaValidation: 'MFI industry data shows enterprises with 20-30% bounce rates are considered higher risk. Baseline bounce rate is 3-8% (NPCI operational data).',
+      limitations: 'Some enterprises use multiple bank accounts — bounce rate may not capture full picture if salary/收入 goes to different account than EMI debit',
+    },
+    testCases: [
+      {
+        description: 'Enterprise with NACH bounce rate at 25% — severe distress triggers',
+        inputs: { nach_bounce: 25 },
+        expectedTriggered: true,
+        expectedRiskDelta: 25,
+        expectedReason: 'NACH bounce rate between 20-30% — severe repayment difficulty',
+      },
+      {
+        description: 'Enterprise with NACH bounce rate at 18% — below severe threshold',
+        inputs: { nach_bounce: 18 },
+        expectedTriggered: false,
+      },
+    ],
+    reviewDate: '2026-07-01',
+  },
+  {
+    id: 'signal.nach_bounce.elevated',
+    version: '1.0.0',
+    category: 'threshold',
+    component: 'debt_service_coverage',
+    description: 'Elevated NACH bounce rate — bounce rate between 10-20% indicates emerging repayment stress requiring monitoring',
+    condition: {
+      type: 'band',
+      variable: 'nach_bounce',
+      min: 10,
+      max: 20,
+    },
+    effect: {
+      riskDelta: 15,
+      reason: 'NACH bounce rate between 10-20% — emerging repayment stress. Enterprise occasionally missing EMI deadlines — may be cash flow timing issue or early sign of structural difficulty',
+      recommendedAction: 'Monitor next 2-3 EMI cycles closely, verify if bounce pattern is consistent or one-off, check if income timing aligns with EMI date, consider adjusting EMI date to post-income period',
+      confidence: 'high',
+    },
+    researchBasis: {
+      source: 'NPCI NACH System Operational Guidelines & CGAP 2024',
+      url: 'https://www.cgap.org/research/publication/leveraging-transactional-data-improve-mse-lending',
+      specificFinding: 'NACH bounce rate 10-20% is "watch zone" — enterprises in this band warrant monitoring for potential escalation. Transactional data generally achieves AUC ~0.70 for default prediction (CGAP 2024).',
+      indiaValidation: 'CRIF High Mark credit bureau data confirms 10-20% NACH bounce rate correlates with elevated credit risk. Baseline bounce rate is 3-8% (NPCI operational data).',
+      limitations: 'First-time borrowers may have higher initial bounce rates due to account setup issues — not necessarily indicative of distress',
+    },
+    testCases: [
+      {
+        description: 'Enterprise with NACH bounce rate at 15% — elevated stress triggers',
+        inputs: { nach_bounce: 15 },
+        expectedTriggered: true,
+        expectedRiskDelta: 15,
+        expectedReason: 'NACH bounce rate between 10-20% — emerging repayment stress',
+      },
+      {
+        description: 'Enterprise with NACH bounce rate at 8% — normal variation',
+        inputs: { nach_bounce: 8 },
+        expectedTriggered: false,
+      },
+    ],
+    reviewDate: '2026-07-01',
+  },
+  {
+    id: 'signal.nach_bounce.minor',
+    version: '1.0.0',
+    category: 'threshold',
+    component: 'debt_service_coverage',
+    description: 'Minor NACH bounce — bounce rate between 5-10% is within normal variation but worth noting',
+    condition: {
+      type: 'band',
+      variable: 'nach_bounce',
+      min: 5,
+      max: 10,
+    },
+    effect: {
+      riskDelta: 5,
+      reason: 'NACH bounce rate between 5-10% — minor, possibly normal variation. Could be account balance timing or minor cash flow fluctuation',
+      recommendedAction: 'Note for records, no immediate action required. Continue regular monitoring cycle. If pattern persists for 3+ months, escalate to watch list',
+      confidence: 'medium',
+    },
+    researchBasis: {
+      source: 'NPCI NACH System Operational Guidelines',
+      url: 'https://www.npci.org.in/what-we-do/nach/product-overview',
+      specificFinding: 'Industry average NACH bounce rate is 3-8% — rates below 10% are generally considered normal operational variation in Indian microfinance',
+      indiaValidation: 'RBI microfinance data shows portfolio-level NACH bounce of 5-8% in normal quarters — individual enterprise rates within this range are typical',
+      limitations: 'Normal bounce rate varies by sector and region — agricultural enterprises may have higher bounce rates during lean seasons',
+    },
+    testCases: [
+      {
+        description: 'Enterprise with NACH bounce rate at 7% — minor bounce triggers small risk increase',
+        inputs: { nach_bounce: 7 },
+        expectedTriggered: true,
+        expectedRiskDelta: 5,
+        expectedReason: 'NACH bounce rate between 5-10% — minor, possibly normal variation',
+      },
+      {
+        description: 'Enterprise with NACH bounce rate at 3% — healthy',
+        inputs: { nach_bounce: 3 },
+        expectedTriggered: false,
+      },
+    ],
+    reviewDate: '2026-07-01',
+  },
+]
